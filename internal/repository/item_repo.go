@@ -2,18 +2,18 @@ package repository
 
 import (
     "database/sql"
-	"avito_test/internal/models"
+    "avito_test/internal/models"
 )
 
-type ItemRepository struct {
+type itemRepository struct {
     db *sql.DB
 }
 
-func NewItemRepository(db *sql.DB) *ItemRepository {
-    return &ItemRepository{db: db}
+func NewItemRepository(db *sql.DB) ItemRepository {
+    return &itemRepository{db: db}
 }
 
-func (r *ItemRepository) GetItems() ([]models.Item, error) {
+func (r *itemRepository) GetItems() ([]models.Item, error) {
     rows, err := r.db.Query("SELECT id, name, price FROM items")
     if err != nil {
         return nil, err
@@ -31,7 +31,7 @@ func (r *ItemRepository) GetItems() ([]models.Item, error) {
     return items, nil
 }
 
-func (r *ItemRepository) GetItemByName(name string) (*models.Item, error) {
+func (r *itemRepository) GetItemByName(name string) (*models.Item, error) {
     var item models.Item
     err := r.db.QueryRow("SELECT id, name, price FROM items WHERE name = $1", name).Scan(&item.ID, &item.Name, &item.Price)
     if err != nil {

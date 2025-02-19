@@ -1,21 +1,21 @@
 package service
 
 import (
-	"avito_test/internal/models"
-	"avito_test/internal/repository"
-	"errors"
+    "avito_test/internal/models"
+    "avito_test/internal/repository"
+    "errors"
 )
 
-type TransactionService struct {
-    transactionRepo *repository.TransactionRepository
-    userRepo        *repository.UserRepository
+type transactionService struct {
+    transactionRepo repository.TransactionRepository
+    userRepo        repository.UserRepository
 }
 
-func NewTransactionService(transactionRepo *repository.TransactionRepository, userRepo *repository.UserRepository) *TransactionService {
-    return &TransactionService{transactionRepo: transactionRepo, userRepo: userRepo}
+func NewTransactionService(transactionRepo repository.TransactionRepository, userRepo repository.UserRepository) TransactionService {
+    return &transactionService{transactionRepo: transactionRepo, userRepo: userRepo}
 }
 
-func (s *TransactionService) SendCoins(fromUserID int, toUsername string, amount int) error {
+func (s *transactionService) SendCoins(fromUserID int, toUsername string, amount int) error {
     if amount <= 0 {
         return errors.New("amount must be positive")
     }
@@ -36,7 +36,6 @@ func (s *TransactionService) SendCoins(fromUserID int, toUsername string, amount
         return errors.New("recipient not found")
     }
 
-    // Обновляем баланс отправителя и получателя
     if err := s.userRepo.UpdateUserCoins(fromUserID, fromUser.Coins-amount); err != nil {
         return err
     }
@@ -44,15 +43,13 @@ func (s *TransactionService) SendCoins(fromUserID int, toUsername string, amount
         return err
     }
 
-    // Создаем запись о транзакции
     return s.transactionRepo.CreateTransaction(fromUserID, toUser.ID, 0, amount)
 }
 
-// CreateTransaction создает запись о транзакции
-func (s *TransactionService) CreateTransaction(fromUserID, toUserID, itemID, amount int) error {
+func (s *transactionService) CreateTransaction(fromUserID, toUserID, itemID, amount int) error {
     return s.transactionRepo.CreateTransaction(fromUserID, toUserID, itemID, amount)
 }
 
-func (s *TransactionService) GetUserTransactions(userID int) ([]models.Transaction, error) {
+func (s *transactionService) GetUserTransactions(userID int) ([]models.Transaction, error) {
     return s.transactionRepo.GetUserTransactions(userID)
 }

@@ -4,16 +4,15 @@ import (
     "net/http"
     "avito_test/internal/service"
     "encoding/json"
-    //"strconv"
 )
 
 type InfoHandler struct {
-    userService *service.UserService
-    itemService *service.ItemService
-    transactionService *service.TransactionService
+    userService        service.UserService
+    itemService        service.ItemService
+    transactionService service.TransactionService
 }
 
-func NewInfoHandler(userService *service.UserService, itemService *service.ItemService, transactionService *service.TransactionService) *InfoHandler {
+func NewInfoHandler(userService service.UserService, itemService service.ItemService, transactionService service.TransactionService) *InfoHandler {
     return &InfoHandler{
         userService:        userService,
         itemService:        itemService,

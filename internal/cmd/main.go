@@ -9,6 +9,7 @@ import (
     "avito_test/internal/repository"
     "avito_test/internal/service"
     _ "github.com/lib/pq"
+    "github.com/go-chi/chi/v5"
 )
 
 func main() {
@@ -46,13 +47,16 @@ func main() {
     sendCoinHandler := handlers.NewSendCoinHandler(transactionService)
     buyHandler := handlers.NewBuyHandler(itemService, userService, transactionService)
 
+    // Создание роутера с использованием chi
+    r := chi.NewRouter()
+
     // Маршрутизация
-    http.HandleFunc("/api/auth", authHandler.Authenticate)
-    http.Handle("/api/info", middleware.AuthMiddleware("your_jwt_secret")(http.HandlerFunc(infoHandler.GetUserInfo)))
-    http.Handle("/api/sendCoin", middleware.AuthMiddleware("your_jwt_secret")(http.HandlerFunc(sendCoinHandler.SendCoins)))
-    http.Handle("/api/buy/{item}", middleware.AuthMiddleware("your_jwt_secret")(http.HandlerFunc(buyHandler.BuyItem)))
+    r.Post("/api/auth", authHandler.Authenticate)
+    r.With(middleware.AuthMiddleware("your_jwt_secret")).Get("/api/info", infoHandler.GetUserInfo)
+    r.With(middleware.AuthMiddleware("your_jwt_secret")).Post("/api/sendCoin", sendCoinHandler.SendCoins)
+    r.With(middleware.AuthMiddleware("your_jwt_secret")).Post("/api/buy/{item}", buyHandler.BuyItem)
 
     // Запуск сервера
     log.Println("Server started on :8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":8080", r))
 }

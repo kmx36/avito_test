@@ -7,10 +7,10 @@ import (
 )
 
 type SendCoinHandler struct {
-    transactionService *service.TransactionService
+    transactionService service.TransactionService
 }
 
-func NewSendCoinHandler(transactionService *service.TransactionService) *SendCoinHandler {
+func NewSendCoinHandler(transactionService service.TransactionService) *SendCoinHandler {
     return &SendCoinHandler{transactionService: transactionService}
 }
 

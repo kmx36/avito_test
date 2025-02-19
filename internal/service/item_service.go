@@ -1,22 +1,22 @@
 package service
 
 import (
-	"avito_test/internal/models"
-	"avito_test/internal/repository"
+    "avito_test/internal/models"
+    "avito_test/internal/repository"
 )
 
-type ItemService struct {
-    itemRepo *repository.ItemRepository
+type itemService struct {
+    itemRepo repository.ItemRepository
 }
 
-func NewItemService(itemRepo *repository.ItemRepository) *ItemService {
-    return &ItemService{itemRepo: itemRepo}
+func NewItemService(itemRepo repository.ItemRepository) ItemService {
+    return &itemService{itemRepo: itemRepo}
 }
 
-func (s *ItemService) GetItems() ([]models.Item, error) {
-    return s.itemRepo.GetItems()
-}
-
-func (s *ItemService) GetItemByName(name string) (*models.Item, error) {
+func (s *itemService) GetItemByName(name string) (*models.Item, error) {
     return s.itemRepo.GetItemByName(name)
+}
+
+func (s *itemService) GetItems() ([]models.Item, error) {
+    return s.itemRepo.GetItems()
 }
