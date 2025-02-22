@@ -1,10 +1,12 @@
 package service
 
 import (
-    "avito_test/internal/models"
-    "testing"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
+	"avito_test/internal/models"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type MockUserRepository struct {
@@ -18,6 +20,9 @@ func (m *MockUserRepository) CreateUser(username, passwordHash string) error {
 
 func (m *MockUserRepository) GetUserByUsername(username string) (*models.User, error) {
     args := m.Called(username)
+    if args.Get(0) == nil {
+        return nil, args.Error(1)
+    }
     return args.Get(0).(*models.User), args.Error(1)
 }
 
@@ -35,10 +40,15 @@ func TestAuthenticate_Success(t *testing.T) {
     mockRepo := new(MockUserRepository)
     authService := NewAuthService(mockRepo, "secret")
 
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+    if err != nil {
+        t.Fatal(err)
+    }
+
     user := &models.User{
         ID:           1,
         Username:     "testuser",
-        PasswordHash: "$2a$10$P7z6JdrxEZjDOf6V55rcHeLbzIuY6K97f5c/xqEzDYYBygws5zmmC",
+        PasswordHash: string(hashedPassword),
     }
 
     mockRepo.On("GetUserByUsername", "testuser").Return(user, nil)
@@ -72,11 +82,13 @@ func TestAuthenticate_UserNotFound(t *testing.T) {
     mockRepo := new(MockUserRepository)
     authService := NewAuthService(mockRepo, "secret")
 
-    mockRepo.On("GetUserByUsername", "nonexistentuser").Return(nil, nil)
+    mockRepo.On("GetUserByUsername", "nonexistentuser").Return(nil, ErrUserNotFound)
 
     token, err := authService.Authenticate("nonexistentuser", "password")
 
     assert.Error(t, err)
-    assert.Empty(t, token)
     assert.Equal(t, ErrUserNotFound, err)
+    assert.Empty(t, token)
+
+    mockRepo.AssertCalled(t, "GetUserByUsername", "nonexistentuser")
 }

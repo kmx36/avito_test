@@ -13,12 +13,10 @@ var (
     ErrInvalidPassword = errors.New("invalid password")
 )
 
-// Интерфейс AuthService
 type AuthService interface {
     Authenticate(username, password string) (string, error)
 }
 
-// Реализация интерфейса AuthService
 type authService struct {
     userRepo  repository.UserRepository
     jwtSecret string
